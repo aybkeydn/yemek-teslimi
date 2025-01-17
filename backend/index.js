@@ -10,7 +10,7 @@ import cors from "cors";
 import User from "./models/user.js";
 import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
-import {CloudinaryStorage } from "multer-storage-cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 import Stripe from "stripe";
 import { webhookRouter } from "./webhook/webhookHandler.js";
 
@@ -27,18 +27,20 @@ mongoose
     .then(() => console.log('veritabanı bağlandı!'))
     .catch((error) => console.log(error));
 
-
 app.use(express.json());
 
-app.use('/stripe',stripeRoute);
-app.use('/food',foodRoute);
+// Kök Rota Ekleme
+app.get('/', (req, res) => {
+    res.send('Merhaba! Backend çalışıyor.');
+});
+
+// Rotalar
+app.use('/stripe', stripeRoute);
+app.use('/food', foodRoute);
 app.use('/order', orderRoute);
-
-
 app.use('/auth', authRouter);
 
-
-
+// Cloudinary Yapılandırma
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -79,19 +81,15 @@ app.post('/upload-image', auth, parser.single('file'), (req, res) => {
 
 app.get('/userProfile', auth, async (req, res) => {
     try {
-
-        const user = await User.findById(req.user.id).select('-password')
+        const user = await User.findById(req.user.id).select('-password');
         if (!user) {
-            return res.status(404).json({ msg: 'User not found'});
+            return res.status(404).json({ msg: 'User not found' });
         }
-
         res.json(user);
-
     } catch (error) {
         console.error(error);
         res.status(500).send('Server error');
     }
 });
 
-
-app.use('webhooks', webhookRouter)
+app.use('/webhooks', webhookRouter);

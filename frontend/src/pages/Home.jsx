@@ -12,7 +12,7 @@ const Home = () => {
     useEffect(() => {
         setLoading(true);
         axios
-            .get('http://localhost:3000/food')
+            .get('https://yemek-teslimi-1.onrender.com/food')
             .then((response) => {
                 setFood(response.data.data);
                 setLoading(false);

@@ -18,14 +18,33 @@ config();
 
 const app = express();
 
-app.use(cors());
+// Whitelist içindeki domainler
+const whitelist = [
+    'https://yemek-teslimi-1.onrender.com', // Production URL
+    'http://localhost:3000' // Geliştirme URL'si
+];
+
+// CORS ayarı
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin || whitelist.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('CORS policy: This origin is not allowed by the server.'));
+        }
+    },
+    credentials: true, // Cookie gönderimi için gerekli
+};
+
+// CORS middleware'i uygulama
+app.use(cors(corsOptions));
 
 app.listen(process.env.PORT, () => console.log(`Server ${process.env.PORT} portunda çalışıyor`));
 
 mongoose
     .connect(process.env.mongodb)
-    .then(() => console.log('veritabanı bağlandı!'))
-    .catch((error) => console.log(error));
+    .then(() => console.log('Veritabanı bağlandı!'))
+    .catch((error) => console.log('Veritabanı bağlantı hatası:', error));
 
 app.use(express.json());
 
